@@ -1,24 +1,61 @@
-from ..utils import handle_response
+from wxpy.utils import handle_response
 
 
-class Chat(dict):
+class Chat(object):
     """
     单个用户(:class:`User`)和群聊(:class:`Group`)的基础类
     """
 
-    def __init__(self, response):
-        super(Chat, self).__init__(response)
+    def __init__(self, raw, bot):
 
-        self.bot = getattr(response, 'bot', None)
-        self.user_name = self.get('UserName')
-        self.nick_name = self.get('NickName')
+        self.raw = raw
+        self.bot = bot
+
+        self.alias = self.raw.get('Alias')
+        self.uin = self.raw.get('Uin')
 
     @property
-    def raw(self):
+    def nick_name(self):
         """
-        原始数据
+        该聊天对象的昵称 (好友、群员的昵称，或群名称)
         """
-        return dict(self)
+        if self.user_name == 'filehelper':
+            return '文件传输助手'
+        elif self.user_name == 'fmessage':
+            return '好友请求'
+        else:
+            return self.raw.get('NickName')
+
+    @property
+    def name(self):
+        """
+        | 该聊天对象的友好名称
+        | 具体为: 从 备注名称、群聊显示名称、昵称(或群名称)，或微信号中，按序选取第一个可用的
+        """
+        for attr in 'remark_name', 'display_name', 'nick_name', 'wxid':
+            _name = getattr(self, attr, None)
+            if _name:
+                return _name
+
+    @property
+    def wxid(self):
+        """
+        | 微信号
+        | 有可能获取不到 (手机客户端也可能获取不到)
+        """
+
+        return self.alias or self.uin or None
+
+    @property
+    def user_name(self):
+        """
+        该聊天对象的内部 ID，通常不需要用到
+
+        ..  attention::
+
+            同个聊天对象在不同用户中，此 ID **不一致** ，且可能在新会话中 **被改变**！
+        """
+        return self.raw.get('UserName')
 
     @handle_response()
     def send(self, msg, media_id=None):
@@ -82,7 +119,7 @@ class Chat(dict):
             bot = Bot()
             @bot.register(msg_types=CARD)
             def reply_text(msg):
-                msg.chat.send_raw_msg(msg['MsgType'], msg['Content'])
+                msg.sender.send_raw_msg(msg['MsgType'], msg['Content'])
 
         """
         return self.bot.core.send_raw_msg(msgType=msg_type, content=content, toUserName=self.user_name)
@@ -100,16 +137,6 @@ class Chat(dict):
         取消聊天对象的置顶状态
         """
         return self.bot.core.set_pinned(userName=self.user_name, isPinned=False)
-
-    @property
-    def name(self):
-        """
-        当前聊天对象的友好名称
-        """
-        for attr in 'remark_name', 'display_name', 'nick_name', 'alias':
-            _name = getattr(self, attr, None)
-            if _name:
-                return _name
 
     def __repr__(self):
         return '<{}: {}>'.format(self.__class__.__name__, self.name)

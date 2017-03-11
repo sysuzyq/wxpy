@@ -1,4 +1,4 @@
-from ..utils import match_name
+from wxpy.utils import match_name
 
 
 class Groups(list):
@@ -28,7 +28,7 @@ class Groups(list):
                     if user not in group:
                         return
             for attr, value in attributes.items():
-                if (getattr(group, attr, None) or group.get(attr)) != value:
+                if (getattr(group, attr, None) or group.raw.get(attr)) != value:
                     return
             return True
 

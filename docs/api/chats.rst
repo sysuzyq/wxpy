@@ -42,22 +42,10 @@
 
         所属的 :class:`机器人对象 <Bot>`
 
-    ..  attribute:: user_name
+    ..  attribute:: raw
 
-        该聊天对象的内部 ID，通常不需要被用到
+        原始数据
 
-        ..  attention::
-
-            同个聊天对象在不同用户中，此 ID **不一致** ，且可能在新会话中 **被改变**！
-
-    ..  attribute:: nick_name
-
-        该聊天对象的昵称 (好友、群员的昵称，或群名称)
-
-    ..  attribute:: name
-
-        | 该聊天对象的友好名称
-        | 具体为: 从 备注名称、昵称(或群名称)，以及群聊显示名称 中按序选择第一个可用的
 
 
 单个用户
@@ -65,30 +53,6 @@
 
 ..  autoclass:: User
     :members:
-
-    ..  attribute:: display_name
-
-        群聊中的昵称
-
-    ..  attribute:: remark_name
-
-        备注名称
-
-    ..  attribute:: sex
-
-        性别
-
-    ..  attribute:: province
-
-        省份
-
-    ..  attribute:: city
-
-        城市
-
-    ..  attribute:: signature
-
-        个性签名
 
 好友
 -------------------
